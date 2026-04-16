@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Course, CourseExercise, Exercise, Equipment
-
+from .models import Course, CourseExercise, Exercise, Equipment, Profile, WorkoutSession
 
 class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,3 +46,33 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     def get_exercises(self, obj):
         ce_qs = obj.courseexercise_set.select_related('exercise__equipment').order_by('order')
         return CourseExerciseSerializer(ce_qs, many=True).data
+
+
+class ExerciseListSerializer(serializers.ModelSerializer):
+    equipment = EquipmentSerializer(read_only=True)
+
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name', 'muscle_group', 'equipment', 'calories_per_minute']
+
+
+class ExerciseDetailSerializer(serializers.ModelSerializer):
+    equipment = EquipmentSerializer(read_only=True)
+
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name', 'description', 'muscle_group', 'equipment', 'calories_per_minute']
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['gender', 'height_cm', 'weight_kg', 'age']
+
+
+class WorkoutSessionSerializer(serializers.ModelSerializer):
+    course_name = serializers.CharField(source='course.name', read_only=True)
+
+    class Meta:
+        model = WorkoutSession
+        fields = ['id', 'course_name', 'session_date', 'start_time', 'end_time', 'total_duration_minutes', 'total_calories', 'notes']

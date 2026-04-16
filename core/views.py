@@ -92,3 +92,78 @@ def get_course_detail(request, course_id):
 
     serializer = CourseDetailSerializer(course)
     return Response({"success": True, "data": serializer.data})
+
+
+from .serializer import ExerciseListSerializer, ExerciseDetailSerializer, ProfileSerializer, WorkoutSessionSerializer
+from .models import Exercise, Profile, WorkoutSession
+
+
+# ── Exercise ─────────────────────────────────────────
+
+@api_view(['GET'])
+def get_all_exercises(request):
+    exercises = Exercise.objects.select_related('equipment').all()
+    serializer = ExerciseListSerializer(exercises, many=True)
+    return Response({
+        "success": True,
+        "count": exercises.count(),
+        "data": serializer.data
+    })
+
+
+@api_view(['GET'])
+def get_exercise_detail(request, exercise_id):
+    try:
+        exercise = Exercise.objects.get(id=exercise_id)
+    except Exercise.DoesNotExist:
+        return Response({"success": False, "message": "Bài tập không tồn tại"}, status=404)
+
+    serializer = ExerciseDetailSerializer(exercise)
+    return Response({"success": True, "data": serializer.data})
+
+
+@api_view(['GET'])
+def search_exercises(request):
+    name = request.query_params.get('name', '').strip()
+    if not name:
+        return Response({"success": False, "message": "Thiếu tham số name"}, status=400)
+
+    exercises = Exercise.objects.filter(name__icontains=name)
+    serializer = ExerciseListSerializer(exercises, many=True)
+    return Response({
+        "success": True,
+        "count": exercises.count(),
+        "data": serializer.data
+    })
+
+
+# ── User Settings & History ───────────────────────────
+
+@api_view(['GET', 'POST'])
+def user_settings(request, user_id):
+    try:
+        profile = Profile.objects.get(user_id=user_id)
+    except Profile.DoesNotExist:
+        return Response({"success": False, "message": "User không tồn tại"}, status=404)
+
+    if request.method == 'GET':
+        serializer = ProfileSerializer(profile)
+        return Response({"success": True, "data": serializer.data})
+
+    elif request.method == 'POST':
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True, "message": "Cập nhật thành công", "data": serializer.data})
+        return Response({"success": False, "errors": serializer.errors}, status=400)
+
+
+@api_view(['GET'])
+def user_history(request, user_id):
+    sessions = WorkoutSession.objects.filter(user_id=user_id).order_by('-session_date')
+    serializer = WorkoutSessionSerializer(sessions, many=True)
+    return Response({
+        "success": True,
+        "count": sessions.count(),
+        "data": serializer.data
+    })
