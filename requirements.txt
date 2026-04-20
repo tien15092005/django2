@@ -84,11 +84,6 @@ jupyterlab==4.3.6
 jupyterlab_pygments==0.3.0
 jupyterlab_server==2.27.3
 keras==3.9.0
-Kivy==2.3.1
-kivy-deps.angle==0.4.0
-kivy-deps.glew==0.3.1
-kivy_deps.sdl2==0.8.0
-Kivy-Garden==0.1.5
 kiwisolver==1.4.5
 lazy_loader==0.4
 libclang==18.1.1
