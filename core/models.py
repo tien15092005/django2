@@ -66,7 +66,8 @@ class Course(models.Model):
         User,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
+        db_column='created_by'
     )
 
     is_active = models.BooleanField(default=True)
