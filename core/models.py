@@ -41,6 +41,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     muscle_group = models.CharField(max_length=100, null=True, blank=True)
+    difficulty = models.CharField(max_length=100, null=True, blank=True)
     guidelines = models.TextField(null=True, blank=True)
 
     equipment = models.ForeignKey(
