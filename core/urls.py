@@ -18,5 +18,10 @@ urlpatterns = [
     # ── User ─────────────────────────────────────────────
     path('users/<int:user_id>/settings/',   views.user_settings,        name='user_settings'),
     path('users/<int:user_id>/history/',    views.user_history,         name='user_history'),
+
+# ── Analysis ─────────────────────────────────────────
+    path('analysis/upload/',                    views.upload_and_analyze,   name='upload_and_analyze'),
+    path('analysis/<str:job_id>/result/',       views.analysis_callback,    name='analysis_callback'),
+    path('analysis/<str:job_id>/status/',       views.analysis_status,      name='analysis_status'),
 ]
 

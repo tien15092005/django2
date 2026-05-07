@@ -167,3 +167,100 @@ def user_history(request, user_id):
         "count": sessions.count(),
         "data": serializer.data
     })
+
+
+import boto3
+import uuid
+from django.views.decorators.csrf import csrf_exempt
+import requests as http_requests
+
+import os
+
+R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
+R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
+R2_BUCKET_NAME = 'fitness-video'
+R2_ENDPOINT = 'https://377cd1b9f45bc4ba22459f510676b999.r2.cloudflarestorage.com'
+R2_PUBLIC_URL = 'https://pub-f72bda466e6f4b24b0439aad1baed19b.r2.dev'
+AI_SERVER_URL = 'https://gym-ai-rxm9.onrender.com'
+
+# jobs lưu trong memory
+jobs = {}
+
+def get_r2_client():
+    return boto3.client(
+        's3',
+        endpoint_url=R2_ENDPOINT,
+        aws_access_key_id=R2_ACCESS_KEY_ID,
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        region_name='auto'
+    )
+
+
+@api_view(['POST'])
+def upload_and_analyze(request):
+    video_file = request.FILES.get('video')
+    exercise = request.data.get('exercise')
+    mode = request.data.get('mode')
+    user_id = request.data.get('user_id')
+
+    if not all([video_file, exercise, mode, user_id]):
+        return Response({"success": False, "message": "Thiếu thông tin"}, status=400)
+
+    # Upload lên R2
+    job_id = str(uuid.uuid4())
+    file_key = f"videos/{job_id}_{video_file.name}"
+
+    try:
+        r2 = get_r2_client()
+        r2.upload_fileobj(video_file, R2_BUCKET_NAME, file_key)
+        video_url = f"{R2_PUBLIC_URL}/{file_key}"
+    except Exception as e:
+        return Response({"success": False, "message": f"Upload R2 thất bại: {str(e)}"}, status=500)
+
+    # Lưu job
+    jobs[job_id] = {"status": "processing", "result_url": None}
+
+    # Gọi AI server
+    callback_url = f"https://django2-yak8.onrender.com/api/analysis/{job_id}/result/"
+    try:
+        http_requests.post(f"{AI_SERVER_URL}/analyze", json={
+            "video_url": video_url,
+            "exercise": exercise,
+            "mode": mode,
+            "user_id": user_id,
+            "job_id": job_id,
+            "callback_url": callback_url
+        })
+    except Exception as e:
+        return Response({"success": False, "message": f"Gọi AI thất bại: {str(e)}"}, status=500)
+
+    return Response({
+        "success": True,
+        "job_id": job_id,
+        "video_url": video_url
+    })
+
+
+@csrf_exempt
+@api_view(['POST'])
+def analysis_callback(request, job_id):
+    if job_id not in jobs:
+        return Response({"success": False, "message": "Job không tồn tại"}, status=404)
+
+    result_url = request.data.get('result_url')
+    jobs[job_id] = {"status": "done", "result_url": result_url}
+
+    return Response({"success": True})
+
+
+@api_view(['GET'])
+def analysis_status(request, job_id):
+    if job_id not in jobs:
+        return Response({"success": False, "message": "Job không tồn tại"}, status=404)
+
+    job = jobs[job_id]
+    return Response({
+        "success": True,
+        "status": job["status"],
+        "result_url": job["result_url"]
+    })
