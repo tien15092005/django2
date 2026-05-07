@@ -15,6 +15,7 @@ class Profile(models.Model):
     height_cm = models.FloatField(null=True, blank=True)
     weight_kg = models.FloatField(null=True, blank=True)
     age = models.IntegerField(null=True, blank=True)
+    avatar = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "profile"
@@ -49,6 +50,7 @@ class Exercise(models.Model):
     )
 
     calories_per_minute = models.FloatField(default=5)
+    guidelines = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "exercise"
