@@ -102,7 +102,13 @@ from .models import Exercise, Profile, WorkoutSession
 
 @api_view(['GET'])
 def get_all_exercises(request):
+    muscle_group = request.query_params.get('muscle_group', '').strip()
+
     exercises = Exercise.objects.select_related('equipment').all()
+
+    if muscle_group:
+        exercises = exercises.filter(muscle_group__icontains=muscle_group)
+
     serializer = ExerciseListSerializer(exercises, many=True)
     return Response({
         "success": True,

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Course, CourseExercise, Exercise, Equipment
 from .models import Course, CourseExercise, Exercise, Equipment, Profile, WorkoutSession
+
 
 class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +14,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'name', 'description', 'muscle_group', 'equipment', 'calories_per_minute']
+        fields = ['id', 'name', 'description', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
 
 
 class CourseExerciseSerializer(serializers.ModelSerializer):
@@ -53,7 +53,7 @@ class ExerciseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'name', 'muscle_group', 'equipment', 'calories_per_minute']
+        fields = ['id', 'name', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
 
 
 class ExerciseDetailSerializer(serializers.ModelSerializer):
@@ -61,13 +61,13 @@ class ExerciseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'name', 'description', 'muscle_group', 'equipment', 'calories_per_minute']
+        fields = ['id', 'name', 'description', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['gender', 'height_cm', 'weight_kg', 'age']
+        fields = ['gender', 'height_cm', 'weight_kg', 'age', 'avatar']
 
 
 class WorkoutSessionSerializer(serializers.ModelSerializer):
