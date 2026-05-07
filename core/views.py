@@ -239,7 +239,7 @@ def upload_and_analyze(request):
     # Gọi AI server
     callback_url = f"https://django2-yak8.onrender.com/api/analysis/{job_id}/result/"
     try:
-        http_requests.post(f"{AI_SERVER_URL}/analyze", json={
+        http_requests.post(f"{AI_SERVER_URL}/process", json={
             "video_url": video_url,
             "exercise": exercise,
             "mode": mode,
