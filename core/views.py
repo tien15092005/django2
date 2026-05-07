@@ -118,6 +118,16 @@ def get_all_exercises(request):
 
 
 @api_view(['GET'])
+def get_exercise_names(request):
+    exercises = Exercise.objects.values('id', 'name')
+    return Response({
+        "success": True,
+        "count": len(exercises),
+        "data": list(exercises)
+    })
+
+
+@api_view(['GET'])
 def get_exercise_detail(request, exercise_id):
     try:
         exercise = Exercise.objects.get(id=exercise_id)

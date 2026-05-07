@@ -12,6 +12,7 @@ urlpatterns = [
 
 # ── Exercise ─────────────────────────────────────────
     path('exercises/',                      views.get_all_exercises,    name='get_all_exercises'),
+    path('exercises/names/', views.get_exercise_names, name='get_exercise_names'),
     path('exercises/<int:exercise_id>/',    views.get_exercise_detail,  name='get_exercise_detail'),
     path('exercises/search/',               views.search_exercises,     name='search_exercises'),
 
