@@ -214,24 +214,15 @@ def get_r2_client():
 
 @api_view(['POST'])
 def upload_and_analyze(request):
-    video_file = request.FILES.get('video')
+    video_url = request.data.get('video_url')
     exercise = request.data.get('exercise')
     mode = request.data.get('mode')
     user_id = request.data.get('user_id')
 
-    if not all([video_file, exercise, mode, user_id]):
+    if not all([video_url, exercise, mode, user_id]):
         return Response({"success": False, "message": "Thiếu thông tin"}, status=400)
 
-    # Upload lên R2
     job_id = str(uuid.uuid4())
-    file_key = f"videos/{job_id}_{video_file.name}"
-
-    try:
-        r2 = get_r2_client()
-        r2.upload_fileobj(video_file, R2_BUCKET_NAME, file_key)
-        video_url = f"{R2_PUBLIC_URL}/{file_key}"
-    except Exception as e:
-        return Response({"success": False, "message": f"Upload R2 thất bại: {str(e)}"}, status=500)
 
     # Lưu job
     jobs[job_id] = {"status": "processing", "result_url": None}
@@ -253,8 +244,8 @@ def upload_and_analyze(request):
     return Response({
         "success": True,
         "job_id": job_id,
-        "video_url": video_url
     })
+
 
 
 @csrf_exempt
