@@ -168,6 +168,10 @@ class WorkoutExercise(models.Model):
 
 
 class Pose(models.Model):
+    key = models.TextField(
+        primary_key=True
+    )
+
     data = models.JSONField()
 
     class Meta:

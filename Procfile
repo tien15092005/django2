@@ -1,1 +1,1 @@
-web: gunicorn csdl.wsgi:application
+web: gunicorn csdl.wsgi:application --timeout 120

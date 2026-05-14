@@ -237,7 +237,7 @@ def upload_and_analyze(request):
             "user_id": user_id,
             "job_id": job_id,
             "callback_url": callback_url
-        })
+        }, timeout=10)
     except Exception as e:
         return Response({"success": False, "message": f"Gọi AI thất bại: {str(e)}"}, status=500)
 
