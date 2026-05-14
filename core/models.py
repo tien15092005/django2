@@ -165,3 +165,14 @@ class WorkoutExercise(models.Model):
 
     class Meta:
         db_table = "workout_exercise"
+
+
+class Pose(models.Model):
+    key = models.TextField(
+        primary_key=True
+    )
+
+    data = models.JSONField()
+
+    class Meta:
+        db_table = "poses"
