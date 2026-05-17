@@ -256,7 +256,7 @@ def analysis_callback(request, job_id):
 
     result_url = request.data.get('result_url')
     llm_response = request.data.get('llm_response')
-    jobs[job_id] = {"status": "done", "result_url": result_url}
+    jobs[job_id] = {"status": "done", "result_url": result_url, "llm_response": llm_response}
 
     return Response({"success": True})
 
