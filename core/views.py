@@ -255,6 +255,7 @@ def analysis_callback(request, job_id):
         return Response({"success": False, "message": "Job không tồn tại"}, status=404)
 
     result_url = request.data.get('result_url')
+    llm_response = request.data.get('llm_response')
     jobs[job_id] = {"status": "done", "result_url": result_url}
 
     return Response({"success": True})
@@ -269,5 +270,6 @@ def analysis_status(request, job_id):
     return Response({
         "success": True,
         "status": job["status"],
-        "result_url": job["result_url"]
+        "result_url": job["result_url"],
+        "llm_response": job["llm_response"]
     })
