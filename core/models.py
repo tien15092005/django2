@@ -10,12 +10,47 @@ class Profile(models.Model):
         ('O', 'Other'),
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    height_cm = models.FloatField(null=True, blank=True)
-    weight_kg = models.FloatField(null=True, blank=True)
-    age = models.IntegerField(null=True, blank=True)
-    avatar = models.TextField(null=True, blank=True)
+    ROLE_CHOICES = [
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        unique=True
+    )
+
+    gender = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES
+    )
+
+    height_cm = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    weight_kg = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    age = models.IntegerField(
+        null=True,
+        blank=True
+    )
+
+    avatar = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default='user'
+    )
 
     class Meta:
         db_table = "profile"
@@ -39,10 +74,28 @@ class Equipment(models.Model):
 # 💪 Exercise
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
-    muscle_group = models.CharField(max_length=100, null=True, blank=True)
-    difficulty = models.CharField(max_length=100, null=True, blank=True)
-    guidelines = models.TextField(null=True, blank=True)
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    muscle_group = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    difficulty = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    guidelines = models.TextField(
+        null=True,
+        blank=True
+    )
 
     equipment = models.ForeignKey(
         Equipment,
@@ -52,7 +105,6 @@ class Exercise(models.Model):
     )
 
     calories_per_minute = models.FloatField(default=5)
-
 
     class Meta:
         db_table = "exercise"
@@ -64,7 +116,11 @@ class Exercise(models.Model):
 # 📚 Course (admin tạo)
 class Course(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
 
     created_by = models.ForeignKey(
         User,
@@ -75,7 +131,10 @@ class Course(models.Model):
     )
 
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         db_table = "course"
@@ -86,24 +145,48 @@ class Course(models.Model):
 
 # 🔗 Course - Exercise
 class CourseExercise(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE
+    )
+
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.CASCADE
+    )
 
     sets = models.IntegerField()
     reps = models.IntegerField()
     order = models.IntegerField()
-    rest_seconds = models.IntegerField(null=True, blank=True)
+
+    rest_seconds = models.IntegerField(
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = "course_exercise"
 
+    def __str__(self):
+        return f"{self.course.name} - {self.exercise.name}"
+
 
 # 🎯 Goal
 class Goal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
-    target_weight = models.FloatField(null=True, blank=True)
-    target_fat_percent = models.FloatField(null=True, blank=True)
+    target_weight = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    target_fat_percent = models.FloatField(
+        null=True,
+        blank=True
+    )
 
     start_date = models.DateField()
     end_date = models.DateField()
@@ -111,25 +194,46 @@ class Goal(models.Model):
     class Meta:
         db_table = "goal"
 
+    def __str__(self):
+        return f"{self.user.username} Goal"
+
 
 # 📊 Progress
 class Progress(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
     date = models.DateField()
-    weight = models.FloatField(null=True, blank=True)
-    fat_percent = models.FloatField(null=True, blank=True)
+
+    weight = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    fat_percent = models.FloatField(
+        null=True,
+        blank=True
+    )
 
     workout_minutes = models.IntegerField(default=0)
+
     calories_burned = models.FloatField(default=0)
 
     class Meta:
         db_table = "progress"
 
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"
+
 
 # 🏃 Workout Session
 class WorkoutSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
     course = models.ForeignKey(
         Course,
@@ -139,40 +243,71 @@ class WorkoutSession(models.Model):
     )
 
     session_date = models.DateField()
+
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    total_duration_minutes = models.FloatField(null=True, blank=True)
+    total_duration_minutes = models.FloatField(
+        null=True,
+        blank=True
+    )
+
     total_calories = models.FloatField(default=0)
 
-    notes = models.TextField(null=True, blank=True)
+    notes = models.TextField(
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = "workout_session"
 
+    def __str__(self):
+        return f"{self.user.username} Session"
+
 
 # 🔥 Exercise trong session
 class WorkoutExercise(models.Model):
-    session = models.ForeignKey(WorkoutSession, on_delete=models.CASCADE)
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    session = models.ForeignKey(
+        WorkoutSession,
+        on_delete=models.CASCADE
+    )
+
+    exercise = models.ForeignKey(
+        Exercise,
+        on_delete=models.CASCADE
+    )
 
     sets = models.IntegerField()
     reps = models.IntegerField()
-    weight_kg = models.FloatField(null=True, blank=True)
 
-    duration_minutes = models.FloatField(null=True, blank=True)
+    weight_kg = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    duration_minutes = models.FloatField(
+        null=True,
+        blank=True
+    )
+
     calories_burned = models.FloatField(default=0)
 
     class Meta:
         db_table = "workout_exercise"
 
+    def __str__(self):
+        return f"{self.session.id} - {self.exercise.name}"
 
+
+# 🤖 AI Pose Data
 class Pose(models.Model):
-    key = models.TextField(
-        primary_key=True
-    )
+    key = models.TextField(primary_key=True)
 
     data = models.JSONField()
 
     class Meta:
         db_table = "poses"
+
+    def __str__(self):
+        return self.key
