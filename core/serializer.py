@@ -58,10 +58,16 @@ class ExerciseListSerializer(serializers.ModelSerializer):
 
 class ExerciseDetailSerializer(serializers.ModelSerializer):
     equipment = EquipmentSerializer(read_only=True)
+    equipment_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = Exercise
-        fields = ['id', 'name', 'description', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
+        fields = ['id', 'name', 'description', 'muscle_group', 'guidelines', 'equipment', 'equipment_id', 'calories_per_minute']
+
+    def create(self, validated_data):
+        equipment_id = validated_data.pop('equipment_id', None)
+        exercise = Exercise.objects.create(**validated_data, equipment_id=equipment_id)
+        return exercise
 
 
 class ProfileSerializer(serializers.ModelSerializer):

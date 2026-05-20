@@ -24,5 +24,11 @@ urlpatterns = [
     path('analysis/upload/',                    views.upload_and_analyze,   name='upload_and_analyze'),
     path('analysis/<str:job_id>/result/',       views.analysis_callback,    name='analysis_callback'),
     path('analysis/<str:job_id>/status/',       views.analysis_status,      name='analysis_status'),
+
+    
+# ── Admin Exercise ────────────────────────────────────
+    path('exercises/',                      views.create_exercise,      name='create_exercise'),
+    path('exercises/<int:exercise_id>/delete/', views.delete_exercise,  name='delete_exercise'),
+
 ]
 

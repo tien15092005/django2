@@ -9,6 +9,26 @@ import datetime
 from django.conf import settings
 
 
+def get_user_from_token(request):
+    auth = request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer '):
+        return None
+    token = auth.split(' ')[1]
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        user = User.objects.get(id=payload['user_id'])
+        return user
+    except:
+        return None
+
+
+def is_admin(user):
+    try:
+        return user.profile.role == 'admin'
+    except:
+        return False
+
+
 def generate_token(user):
     payload = {
         'user_id': user.id,
@@ -273,3 +293,33 @@ def analysis_status(request, job_id):
         "result_url": job["result_url"],
         "llm_response": job["llm_response"]
     })
+
+
+
+# ── Admin Exercise ────────────────────────────────────
+
+@api_view(['POST'])
+def create_exercise(request):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    serializer = ExerciseDetailSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, "data": serializer.data}, status=201)
+    return Response({"success": False, "errors": serializer.errors}, status=400)
+
+
+@api_view(['DELETE'])
+def delete_exercise(request, exercise_id):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    try:
+        exercise = Exercise.objects.get(id=exercise_id)
+        exercise.delete()
+        return Response({"success": True, "message": "Xóa thành công"})
+    except Exercise.DoesNotExist:
+        return Response({"success": False, "message": "Bài tập không tồn tại"}, status=404)
