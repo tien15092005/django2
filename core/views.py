@@ -60,6 +60,7 @@ def login(request):
             "id": user.id,
             "username": user.username,
             "email": user.email,
+            "role": user.profile.role if hasattr(user, 'profile') else 'user',
         }
     })
 
@@ -80,14 +81,14 @@ def signup(request):
     token = generate_token(user)
     return Response({
         "success": True,
-        "message": "Đăng ký thành công",
         "token": token,
         "user": {
             "id": user.id,
             "username": user.username,
             "email": user.email,
+            "role": user.profile.role if hasattr(user, 'profile') else 'user',
         }
-    }, status=201)
+    })
 
 
 # ── Course ───────────────────────────────────────────
