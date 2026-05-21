@@ -384,3 +384,39 @@ def delete_course(request, course_id):
         return Response({"success": True, "message": "Xóa thành công"})
     except Course.DoesNotExist:
         return Response({"success": False, "message": "Course không tồn tại"}, status=404)
+
+
+@api_view(['PUT'])
+def update_exercise(request, exercise_id):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    try:
+        exercise = Exercise.objects.get(id=exercise_id)
+    except Exercise.DoesNotExist:
+        return Response({"success": False, "message": "Bài tập không tồn tại"}, status=404)
+
+    serializer = ExerciseDetailSerializer(exercise, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, "data": serializer.data})
+    return Response({"success": False, "errors": serializer.errors}, status=400)
+
+
+@api_view(['PUT'])
+def update_course(request, course_id):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response({"success": False, "message": "Course không tồn tại"}, status=404)
+
+    serializer = CourseListSerializer(course, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, "data": serializer.data})
+    return Response({"success": False, "errors": serializer.errors}, status=400)
