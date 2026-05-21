@@ -15,6 +15,13 @@ class Profile(models.Model):
         ('admin', 'Admin'),
     ]
 
+    BLOOD_TYPE_CHOICES = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('AB', 'AB'),
+        ('O', 'O'),
+    ]
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -23,7 +30,19 @@ class Profile(models.Model):
 
     gender = models.CharField(
         max_length=1,
-        choices=GENDER_CHOICES
+        choices=GENDER_CHOICES,
+        null=True
+    )
+
+    blood_type = models.CharField(
+        max_length=2,
+        choices=BLOOD_TYPE_CHOICES,
+        null=True
+    )
+
+    medical_conditions = models.TextField(
+        null=True,
+        blank=True
     )
 
     height_cm = models.FloatField(

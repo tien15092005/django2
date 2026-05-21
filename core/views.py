@@ -59,6 +59,8 @@ def login(request):
         "user": {
             "id": user.id,
             "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "email": user.email,
             "role": user.profile.role if hasattr(user, 'profile') else 'user',
         }
@@ -70,12 +72,14 @@ def signup(request):
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '').strip()
     email = request.data.get('email', '').strip()
+    first_name = request.data.get('firstName', '').strip()
+    last_name = request.data.get('lastName', '').strip()
 
-    if not username or not password:
+    if not username or not password or not email or not first_name or not last_name:
         return Response(
             {
                 "success": False,
-                "message": "Thiếu username hoặc password"
+                "message": "Thiếu thông tin đăng kí"
             },
             status=400
         )
@@ -93,13 +97,14 @@ def signup(request):
     user = User.objects.create_user(
         username=username,
         password=password,
-        email=email
+        email=email,
+        first_name=first_name,
+        last_name=last_name
     )
 
     # tạo profile mặc định
     Profile.objects.create(
-        user=user,
-        gender='O'
+        user=user
     )
 
     # tạo jwt token
