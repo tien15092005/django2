@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import Course,Profile
-from .serializer import CourseListSerializer, CourseDetailSerializer
+from .serializer import CourseListSerializer, CourseDetailSerializer, CourseAdminSerializer
 import jwt
 import datetime
 from django.conf import settings
@@ -124,9 +124,26 @@ def signup(request):
 
 # ── Course ───────────────────────────────────────────
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_all_courses(request):
-    courses = Course.objects.filter(is_active=True).order_by('-created_at')
+    if request.method == 'POST':
+        user = get_user_from_token(request)
+        if not user or not is_admin(user):
+            return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+        serializer = CourseAdminSerializer(data=request.data, context={'request': request, 'user': user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True, "data": serializer.data}, status=201)
+        return Response({"success": False, "errors": serializer.errors}, status=400)
+
+    user = get_user_from_token(request)
+    admin_request = bool(user and is_admin(user))
+    if admin_request:
+        courses = Course.objects.all().order_by('-created_at')
+    else:
+        courses = Course.objects.filter(is_active=True).order_by('-created_at')
+
     serializer = CourseListSerializer(courses, many=True)
     return Response({
         "success": True,
@@ -138,8 +155,13 @@ def get_all_courses(request):
 @api_view(['GET'])
 def get_course_detail(request, course_id):
     try:
-        course = Course.objects.get(id=course_id, is_active=True)
+        course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
+        return Response({"success": False, "message": "Course không tồn tại"}, status=404)
+
+    user = get_user_from_token(request)
+    admin_request = bool(user and is_admin(user))
+    if not admin_request and not course.is_active:
         return Response({"success": False, "message": "Course không tồn tại"}, status=404)
 
     serializer = CourseDetailSerializer(course)
@@ -152,8 +174,19 @@ from .models import Exercise, Profile, WorkoutSession
 
 # ── Exercise ─────────────────────────────────────────
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_all_exercises(request):
+    if request.method == 'POST':
+        user = get_user_from_token(request)
+        if not user or not is_admin(user):
+            return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+        serializer = ExerciseDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True, "data": serializer.data}, status=201)
+        return Response({"success": False, "errors": serializer.errors}, status=400)
+
     muscle_group = request.query_params.get('muscle_group', '').strip()
 
     exercises = Exercise.objects.select_related('equipment').all()
@@ -365,7 +398,7 @@ def create_course(request):
     if not user or not is_admin(user):
         return Response({"success": False, "message": "Không có quyền"}, status=403)
 
-    serializer = CourseListSerializer(data=request.data)
+    serializer = CourseAdminSerializer(data=request.data, context={'request': request, 'user': user})
     if serializer.is_valid():
         serializer.save()
         return Response({"success": True, "data": serializer.data}, status=201)
@@ -380,8 +413,11 @@ def delete_course(request, course_id):
 
     try:
         course = Course.objects.get(id=course_id)
-        course.delete()
-        return Response({"success": True, "message": "Xóa thành công"})
+        if not course.is_active:
+            return Response({"success": True, "message": "Course đã bị vô hiệu hóa"})
+        course.is_active = False
+        course.save(update_fields=['is_active'])
+        return Response({"success": True, "message": "Vô hiệu hóa course thành công"})
     except Course.DoesNotExist:
         return Response({"success": False, "message": "Course không tồn tại"}, status=404)
 
@@ -415,7 +451,7 @@ def update_course(request, course_id):
     except Course.DoesNotExist:
         return Response({"success": False, "message": "Course không tồn tại"}, status=404)
 
-    serializer = CourseListSerializer(course, data=request.data, partial=True)
+    serializer = CourseAdminSerializer(course, data=request.data, partial=True, context={'request': request, 'user': user})
     if serializer.is_valid():
         serializer.save()
         return Response({"success": True, "data": serializer.data})

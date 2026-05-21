@@ -27,12 +27,10 @@ urlpatterns = [
 
 
 # ── Admin Exercise ────────────────────────────────────
-    path('exercises/',                      views.create_exercise,      name='create_exercise'),
     path('exercises/<int:exercise_id>/delete/', views.delete_exercise,  name='delete_exercise'),
 
 
 # ── Admin Course ─────────────────────────────────────
-    path('courses/',                        views.create_course,        name='create_course'),
     path('courses/<int:course_id>/delete/', views.delete_course,        name='delete_course'),
 
     path('exercises/<int:exercise_id>/update/', views.update_exercise, name='update_exercise'),
