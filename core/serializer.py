@@ -74,7 +74,7 @@ class ExerciseDetailSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['gender', 'height_cm', 'weight_kg', 'age', 'avatar']
+        fields = ['gender', 'blood_type', 'medical_conditions', 'height_cm', 'weight_kg', 'age', 'avatar']
 
 
 class WorkoutSessionSerializer(serializers.ModelSerializer):

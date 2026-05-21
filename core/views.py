@@ -72,8 +72,8 @@ def signup(request):
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '').strip()
     email = request.data.get('email', '').strip()
-    first_name = request.data.get('firstName', '').strip()
-    last_name = request.data.get('lastName', '').strip()
+    first_name = request.data.get('first_name', '').strip()
+    last_name = request.data.get('last_name', '').strip()
 
     if not username or not password or not email or not first_name or not last_name:
         return Response(
