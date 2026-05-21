@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .models import Course
+from .models import Course,Profile
 from .serializer import CourseListSerializer, CourseDetailSerializer
 import jwt
 import datetime
@@ -72,13 +72,39 @@ def signup(request):
     email = request.data.get('email', '').strip()
 
     if not username or not password:
-        return Response({"success": False, "message": "Thiếu username hoặc password"}, status=400)
+        return Response(
+            {
+                "success": False,
+                "message": "Thiếu username hoặc password"
+            },
+            status=400
+        )
 
     if User.objects.filter(username=username).exists():
-        return Response({"success": False, "message": "Username đã tồn tại"}, status=400)
+        return Response(
+            {
+                "success": False,
+                "message": "Username đã tồn tại"
+            },
+            status=400
+        )
 
-    user = User.objects.create_user(username=username, password=password, email=email)
+    # tạo user
+    user = User.objects.create_user(
+        username=username,
+        password=password,
+        email=email
+    )
+
+    # tạo profile mặc định
+    Profile.objects.create(
+        user=user,
+        gender='O'
+    )
+
+    # tạo jwt token
     token = generate_token(user)
+
     return Response({
         "success": True,
         "token": token,
@@ -86,7 +112,7 @@ def signup(request):
             "id": user.id,
             "username": user.username,
             "email": user.email,
-            "role": user.profile.role if hasattr(user, 'profile') else 'user',
+            "role": user.profile.role,
         }
     })
 
