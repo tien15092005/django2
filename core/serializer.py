@@ -26,11 +26,12 @@ class CourseExerciseSerializer(serializers.ModelSerializer):
 
 
 class CourseListSerializer(serializers.ModelSerializer):
-    exercise_count = serializers.SerializerMethodField()
+    exercise_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Course
         fields = ['id', 'name', 'description', 'is_active', 'created_at', 'exercise_count']
+        read_only_fields = ['created_at', 'exercise_count']
 
     def get_exercise_count(self, obj):
         return obj.courseexercise_set.count()

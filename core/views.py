@@ -350,3 +350,32 @@ def delete_exercise(request, exercise_id):
         return Response({"success": True, "message": "Xóa thành công"})
     except Exercise.DoesNotExist:
         return Response({"success": False, "message": "Bài tập không tồn tại"}, status=404)
+
+
+# ── Admin Course ─────────────────────────────────────
+
+@api_view(['POST'])
+def create_course(request):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    serializer = CourseListSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, "data": serializer.data}, status=201)
+    return Response({"success": False, "errors": serializer.errors}, status=400)
+
+
+@api_view(['DELETE'])
+def delete_course(request, course_id):
+    user = get_user_from_token(request)
+    if not user or not is_admin(user):
+        return Response({"success": False, "message": "Không có quyền"}, status=403)
+
+    try:
+        course = Course.objects.get(id=course_id)
+        course.delete()
+        return Response({"success": True, "message": "Xóa thành công"})
+    except Course.DoesNotExist:
+        return Response({"success": False, "message": "Course không tồn tại"}, status=404)
