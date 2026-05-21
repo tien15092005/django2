@@ -143,7 +143,7 @@ class ExerciseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exercise
-        fields = ['id', 'name', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
+        fields = ['id', 'name', 'description', 'muscle_group', 'guidelines', 'equipment', 'calories_per_minute']
 
 
 class ExerciseDetailSerializer(serializers.ModelSerializer):
